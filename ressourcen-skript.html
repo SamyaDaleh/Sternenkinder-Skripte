@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ressourcen-Tracker mit Quellen</title>
+  <style>
+    body {
+      background-color: white !important;
+      color: black !important;
+    }
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 6px;
+      text-align: center;
+    }
+    input[type=number] {
+      width: 80px;
+    }
+    .tooltip {
+      position: relative;
+    }
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: max-content;
+      background-color: #eee;
+      color: #000;
+      border: 1px solid #666;
+      text-align: left;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      top: 130%;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+    }
+	.left-align-tooltip .tooltiptext {
+	  left: 0;
+	  transform: none;
+	}
+	.spend-indicator {
+	  color: red;
+	  font-weight: bold;
+	  margin-left: 4px;
+	}
+	.account-field {
+	  display: flex;
+	  align-items: center;
+	  gap: 2px;
+	}
+
+	.account-field input {
+	  width: 60px; /* adjust to taste */
+	  text-align: right;
+	}
+  </style>
+</head>
+<body onload="loadState()">
+
+<div id="language-switcher">
+  <label><input type="radio" name="lang" value="de" onchange="setLanguage(this.value)"> <img src="de_flag.png" alt="Deutsch"></label>
+  <label><input type="radio" name="lang" value="en" checked onchange="setLanguage(this.value)"> <img src="uk_flag.png" alt="English"></label>
+</div>
+
+<br/>
+<br/>
+
+<table id="resource-table">
+  <tr>
+    <th colspan="2" style="background-color:#90EE90" data-i18n="food"></th>
+    <th colspan="2" style="background-color:#FFD700" data-i18n="money"></th>
+    <th colspan="2" style="background-color:#87CEFA" data-i18n="research"></th>
+    <th colspan="2" style="background-color:#DDA0DD" data-i18n="culture"></th>
+  </tr>
+  <tr>
+    <td data-i18n="income"></td>
+    <td data-i18n="account"></td>
+    <td data-i18n="income"></td>
+    <td data-i18n="account"></td>
+    <td data-i18n="income"></td>
+    <td data-i18n="account"></td>
+    <td data-i18n="income"></td>
+    <td data-i18n="account"></td>
+  </tr>
+  <tr>
+    <td class="tooltip left-align-tooltip"><span id="income-food">3</span><div class="tooltiptext" id="tooltip-food"></div></td>
+    <td>
+		<button type="button" onclick="adjustAccount('food', -1)">–</button>
+		<input type="number" id="account-food" value="0" onchange="logManualChange(this, 'food'); saveState()">
+		<button type="button" onclick="adjustAccount('food', 1)">+</button>
+	</td>
+    <td class="tooltip"><span id="income-money">3</span><div class="tooltiptext" id="tooltip-money"></div></td>
+    <td>
+		<button type="button" onclick="adjustAccount('money', -1)">–</button>
+		<input type="number" id="account-money" value="0" onchange="logManualChange(this, 'money'); saveState()">
+		<button type="button" onclick="adjustAccount('money', 1)">+</button>
+	</td>
+    <td class="tooltip"><span id="income-research">3</span><div class="tooltiptext" id="tooltip-research"></div></td>
+    <td>
+		<button type="button" onclick="adjustAccount('research', -1)">–</button>
+		<input type="number" id="account-research" value="0" onchange="logManualChange(this, 'research'); saveState()">
+		<button type="button" onclick="adjustAccount('research', 1)">+</button>
+	</td>
+    <td class="tooltip"><span id="income-culture">3</span><div class="tooltiptext" id="tooltip-culture"></div></td>
+    <td>
+		<button type="button" onclick="adjustAccount('culture', -1)">–</button>
+		<input type="number" id="account-culture" value="0" onchange="logManualChange(this, 'culture'); saveState()">
+		<button type="button" onclick="adjustAccount('culture', 1)">+</button>
+	</td>
+  </tr>
+</table>
+
+<br>
+
+<button onclick="applyIncome()" data-i18n="apply_income"></button>
+
+<br>
+<br>
+<br>
+
+<div>
+  <label data-i18n="add_subtract"></label>&nbsp;
+  <select id="kind-select">
+    <option value="income" data-i18n="income"></option>
+    <option value="maintenance" data-i18n="maintenance"></option>
+  </select>
+  <label>: </label>
+  <button type="button" onclick="adjustInput('add-value', -1)">–</button>
+  <input id="add-value" type="number" value="0">
+  <button type="button" onclick="adjustInput('add-value', 1)">+</button>
+  <select id="resource-select">
+    <option value="food" data-i18n="food"></option>
+    <option value="money" data-i18n="money"></option>
+    <option value="research" data-i18n="research"></option>
+    <option value="culture" data-i18n="culture"></option>
+  </select>
+  <span data-i18n="by"></span>
+  <select id="source-select">
+    <option value="counselors" data-i18n="counselors"></option>
+    <option value="units" data-i18n="units"></option>
+    <option value="development_aid" data-i18n="development_aid"></option>
+    <option value="events" data-i18n="events"></option>
+    <option value="buildings" data-i18n="buildings"></option>
+    <option value="laws" data-i18n="laws"></option>
+    <option value="favor" data-i18n="favor"></option>
+    <option value="trade_routes" data-i18n="trade_routes"></option>
+    <option value="institutions" data-i18n="institutions"></option>
+    <option value="planets" data-i18n="planets"></option>
+    <option value="politics" data-i18n="politics"></option>
+    <option value="governments" data-i18n="governments"></option>
+    <option value="technologies" data-i18n="technologies"></option>
+    <option value="contracts" data-i18n="contracts"></option>
+  </select>
+  <button onclick="updateIncomeFromForm()">OK</button>
+</div>
+
+<br>
+<br>
+<br>
+
+<table id="resource-table-2">
+  <tr>
+    <th data-i18n="empire_size"></th>
+    <th data-i18n="votes"></th>
+    <th data-i18n="ground_capacity"></th>
+    <th data-i18n="space_capacity"></th>
+    <th data-i18n="victory_points"></th>
+  </tr>
+  <tr>
+    <td class="tooltip left-align-tooltip"><span id="account-empire_size">1</span><div class="tooltiptext" id="tooltip-empire_size"></div></td>
+    <td class="tooltip"><span id="account-votes">3</span><div class="tooltiptext" id="tooltip-votes"></div></td>
+    <td class="tooltip">
+      <span id="account-ground_capacity" data-base="3">3</span>
+      <div class="tooltiptext" id="tooltip-ground_capacity"></div>
+      <br>
+      <input type="range" id="slider-ground_capacity" min="0" max="3" value="0" oninput="updateSpentFromSlider('ground_capacity', this.value)">
+    </td>
+    <td class="tooltip">
+      <span id="account-space_capacity" data-base="1">1</span>
+      <div class="tooltiptext" id="tooltip-space_capacity"></div>
+      <br>
+      <input type="range" id="slider-space_capacity" min="0" max="1" value="0" oninput="updateSpentFromSlider('space_capacity', this.value)">
+    </td>
+    <td class="tooltip"><span id="account-victory_points">0</span><div class="tooltiptext" id="tooltip-victory_points"></div></td>
+  </tr>
+</table>
+
+<br>
+
+<div>
+  <label data-i18n="add"></label>:
+  <button type="button" onclick="adjustInput('add-other-value', -1)">-</button>
+  <input type="number" id="add-other-value" value="0">
+  <button type="button" onclick="adjustInput('add-other-value', 1)">+</button>
+  <select id="resource-select-3">
+    <option value="empire_size" data-i18n="empire_size"></option>
+    <option value="votes" data-i18n="votes"></option>
+    <option value="ground_capacity" data-i18n="ground_capacity"></option>
+    <option value="space_capacity" data-i18n="space_capacity"></option>
+    <option value="victory_points" data-i18n="victory_points"></option>
+  </select>
+  <span data-i18n="by"></span>
+  <select id="source-select-3">
+    <option value="counselors" data-i18n="counselors"></option>
+    <option value="units" data-i18n="units"></option>
+    <option value="development_aid" data-i18n="development_aid"></option>
+    <option value="events" data-i18n="events"></option>
+    <option value="research" data-i18n="research"></option>
+    <option value="buildings" data-i18n="buildings"></option>
+    <option value="favor" data-i18n="favor"></option>
+    <option value="planets" data-i18n="planets"></option>
+    <option value="politics" data-i18n="politics"></option>
+    <option value="governments" data-i18n="governments"></option>
+    <option value="contracts" data-i18n="contracts"></option>
+  </select>
+  <button onclick="addToOtherResources()">OK</button>
+</div>
+<br>
+
+<br>
+<br>
+<h3 data-i18n="political_actions"></h3>
+<br>
+<label data-i18n="free_actions"></label>: <input type="number" id="political-action-free" value="1" style="width:30px" onchange="logManualChange(this, 'political-action-free'); saveState()"><br>
+<label data-i18n="law_actions"></label>: <input type="number" id="political-action-law" value="0" style="width:30px" onchange="logManualChange(this, 'political-action-law'); saveState()"><br>
+<label data-i18n="institution_actions"></label>: <input type="number" id="political-action-institution" value="0" style="width:30px" onchange="logManualChange(this, 'political-action-institution'); saveState()"><br>
+<label data-i18n="government_actions"></label>: <input type="number" id="political-action-government" value="0" style="width:30px" onchange="logManualChange(this, 'political-action-government'); saveState()"><br>
+<label data-i18n="contract_actions"></label>: <input type="number" id="political-action-contract" value="0" style="width:30px" onchange="logManualChange(this, 'political-action-contract'); saveState()"><br>
+
+<br>
+<br>
+<br>
+<h3 data-i18n="trade_ratios"></h3>
+<br>
+<span style="background-color:#90EE90" data-i18n="food"></span> in <span style="background-color:#FFD700" data-i18n="money"></span>: <input type="number" id="food-to-awe" value="5" style="width:30px" onchange="logManualChange(this, 'food-to-awe'); saveState()">: 1<br>
+<span style="background-color:#FFD700" data-i18n="money"></span> in <span style="background-color:#90EE90" data-i18n="food"></span>: <input type="number" id="awe-to-food" value="5" style="width:30px" onchange="logManualChange(this, 'awe-to-food'); saveState()">: 1<br>
+<span style="background-color:#87CEFA" data-i18n="research"></span> in <span style="background-color:#FFD700" data-i18n="money"></span>: <input type="number" id="research-to-awe" value="5" style="width:30px" onchange="logManualChange(this, 'research-to-awe'); saveState()">: 1<br>
+<span style="background-color:#FFD700" data-i18n="money"></span> in <span style="background-color:#87CEFA" data-i18n="research"></span>: <input type="number" id="awe-to-research" value="5" style="width:30px" onchange="logManualChange(this, 'awe-to-research'); saveState()">: 1<br>
+<span style="background-color:#DDA0DD" data-i18n="culture"></span> in <span style="background-color:#FFD700" data-i18n="money"></span>: <input type="number" id="culture-to-awe" value="0" style="width:30px" onchange="logManualChange(this, 'culture-to-awe-1'); saveState()">: <input type="number" id="culture-to-awe-2" value="0" style="width:30px" onchange="logManualChange(this, 'culture-to-awe-2'); saveState()"><br>
+<span style="background-color:#FFD700" data-i18n="money"></span> in <span style="background-color:#DDA0DD" data-i18n="culture"></span>: <input type="number" id="awe-to-culture" value="0" style="width:30px" onchange="logManualChange(this, 'awe-to-culture-1'); saveState()">: <input type="number" id="awe-to-culture-2" value="0" style="width:30px" onchange="logManualChange(this, 'awe-to-culture-2'); saveState()"><br>
+
+<br>
+<br>
+
+<button onclick="resetState()">Reset</button>
+
+<br>
+<br>
+
+<h3 data-i18n="own_notes"></h3>
+<textarea id="notes" rows="10" cols="100" onchange="saveState()"></textarea>
+
+<br>
+<br>
+
+<h3>Action Log</h3>
+<textarea id="action-log" rows="10" cols="100" readonly></textarea>
+
+<script>
+  let currentLang = localStorage.getItem("lang") || "de";
+
+  const incomeData = {
+    food: {'home_world': 3},
+    money: {'home_world': 3},
+    research: {'home_world': 3},
+    culture: {'home_world': 3}
+  };
+
+  const costData = {
+    food: {},
+    money: {},
+    research: {},
+    culture: {}
+  };
+
+  const otherResourceData = {
+    empire_size: {'home_world': 1},
+    votes: {'home_world': 3},
+    ground_capacity: {'home_world': 3},
+    space_capacity: {'home_world': 1},
+    victory_points: {}
+  };
+
+  const spentCapacity = {
+    ground_capacity: 0,
+    space_capacity: 0
+  };
+
+  let roundNumber = 0;
+
+  function updateSpentFromSlider(type, value) {
+    const newSpent = parseInt(value, 10);
+    const oldSpent = spentCapacity[type];
+    spentCapacity[type] = newSpent;
+    updateCapacityDisplay(type);
+    if (newSpent !== oldSpent) {
+      logAction(`Set spent ${type} to ${newSpent}`);
+      saveState();
+    }
+  }
+
+  function updateCapacityDisplay(type) {
+    const valueCell = document.getElementById(`account-${type}`);
+    const baseValue = parseInt(valueCell.getAttribute("data-base"), 10);
+    const spent = spentCapacity[type] || 0;
+
+    valueCell.innerHTML = spent > 0
+            ? `${baseValue}<span class="spend-indicator">-${spent}</span>`
+            : `${baseValue}`;
+
+    // Update slider max and value
+    const slider = document.getElementById(`slider-${type}`);
+    if (slider) {
+      slider.max = baseValue;
+      slider.value = spent;
+    }
+  }
+
+  function updateIncomeDisplay(type) {
+    const sources = incomeData[type];
+    let total = 0;
+    let tooltipText = "";
+
+    for (const [source, value] of Object.entries(sources)) {
+      total += value;
+      const translatedSource = translations[currentLang][source] || source;
+      tooltipText += `${translatedSource}: ${value}<br>`;
+    }
+
+    const sources2 = costData[type];
+
+    for (const [source2, value] of Object.entries(sources2)) {
+      total += value;
+      const translatedSource2 = translations[currentLang][source2] || source2;
+      tooltipText += `${translatedSource2}: ${value}<br>`;
+    }
+
+    document.getElementById(`income-${type}`).textContent = total;
+    document.getElementById(`tooltip-${type}`).innerHTML = tooltipText;
+  }
+
+  function updateOtherResourceDisplay(type) {
+    const sources = otherResourceData[type];
+    let total = 0;
+    let tooltipText = "";
+
+    for (const [source, value] of Object.entries(sources)) {
+      total += value;
+      const translatedSource = translations[currentLang][source] || source;
+      tooltipText += `${translatedSource}: ${value}<br>`;
+    }
+
+    const cell = document.getElementById(`account-${type}`);
+    flashAccountCell(type);
+
+    cell.setAttribute("data-base", total);
+    document.getElementById(`tooltip-${type}`).innerHTML = tooltipText;
+
+    // For ground/space capacity, update display including red offset
+    if (type === "ground_capacity" || type === "space_capacity") {
+      updateCapacityDisplay(type);
+    } else {
+      cell.textContent = total;
+    }
+  }
+
+  function applyIncome() {
+    const types = ["food", "money", "research", "culture"];
+
+    roundNumber++;
+    if (roundNumber > 1) {
+      logAction(`End politics phase round ${roundNumber}.`);
+      logAction(``);
+    }
+    logAction(`Start economy phase round ${roundNumber}.`);
+
+    types.forEach(type => {
+      const income = parseInt(document.getElementById(`income-${type}`).textContent, 10);
+      const accountInput = document.getElementById(`account-${type}`);
+      const account = parseInt(accountInput.value, 10) || 0;
+      accountInput.value = account + income;
+
+      if (income > 0) {
+        logAction(`Apply ${income} income to ${type} account`);
+      }
+    });
+
+    // Reset spent capacity
+    spentCapacity.ground_capacity = 0;
+    spentCapacity.space_capacity = 0;
+    updateCapacityDisplay("ground_capacity");
+    updateCapacityDisplay("space_capacity");
+
+    saveState();
+  }
+
+  function updateIncomeFromForm() {
+    const value = parseInt(document.getElementById("add-value").value, 10);
+    const type = document.getElementById("resource-select").value;
+    const source = document.getElementById("source-select").value;
+    const kind = document.getElementById("kind-select").value;
+
+    const isIncome = kind === "income";
+    const dataset = isIncome ? incomeData : costData;
+    const direction = isIncome ? 1 : -1;
+    const logPrefix = isIncome ? "Income" : "Maintenance";
+
+    if (!dataset[type][source]) {
+      dataset[type][source] = 0;
+    }
+
+    dataset[type][source] += direction * value;
+    updateIncomeDisplay(type);
+
+    const action = direction === 1 ? "Added" : "Subtracted";
+    logAction(`${logPrefix}: ${action} ${value} to/from ${type} from source: ${source}`);
+
+    flashIncomeCell(type);
+    saveState();
+  }
+
+  function addToOtherResources() {
+    const value = parseInt(document.getElementById("add-other-value").value, 10);
+    const type = document.getElementById("resource-select-3").value;
+    const source = document.getElementById("source-select-3").value;
+
+    if (!otherResourceData[type][source]) {
+      otherResourceData[type][source] = 0;
+    }
+
+    otherResourceData[type][source] += value;
+    logAction(`Added: ${value} to account: ${type} from source: ${source}`);
+    updateCapacityDisplay("ground_capacity");
+    updateCapacityDisplay("space_capacity");
+    updateOtherResourceDisplay(type);
+    saveState();
+  }
+
+  function saveState() {
+    const state = {
+      lang: currentLang,
+      incomeData,
+      costData,
+      otherResourceData,
+      spentCapacity,
+      roundNumber,
+      accounts: {
+        food: document.getElementById("account-food").value,
+        money: document.getElementById("account-money").value,
+        research: document.getElementById("account-research").value,
+        culture: document.getElementById("account-culture").value
+      },
+      secondary: {
+        empire: document.getElementById("account-empire_size").textContent,
+        votes: document.getElementById("account-votes").textContent,
+        ground: document.getElementById("account-ground_capacity").getAttribute("data-base"),
+        space: document.getElementById("account-space_capacity").getAttribute("data-base"),
+        vp: document.getElementById("account-victory_points").textContent
+      },
+      political: {
+        free: document.getElementById("political-action-free").value,
+        law: document.getElementById("political-action-law").value,
+        institution: document.getElementById("political-action-institution").value,
+        government: document.getElementById("political-action-government").value,
+        contract: document.getElementById("political-action-contract").value
+      },
+      trade: {
+        food_awe: document.getElementById("food-to-awe").value,
+        awe_food: document.getElementById("awe-to-food").value,
+        research_awe: document.getElementById("research-to-awe").value,
+        awe_research: document.getElementById("awe-to-research").value,
+        culture_awe: document.getElementById("culture-to-awe").value,
+        awe_culture: document.getElementById("awe-to-culture").value,
+        culture_awe2: document.getElementById("culture-to-awe-2").value,
+        awe_culture2: document.getElementById("awe-to-culture-2").value
+      },
+      log: document.getElementById("action-log").value,
+      notes: document.getElementById("notes").value
+
+    };
+    localStorage.setItem("gameState", JSON.stringify(state));
+  }
+
+  function loadState() {
+    const state = JSON.parse(localStorage.getItem("gameState"));
+    currentLang = localStorage.getItem("lang") || "de";
+    document.addEventListener("DOMContentLoaded", () => {
+      applyTranslations();
+      document.querySelector(`input[name=lang][value=${currentLang}]`).checked = true;
+    });
+    applyTranslations();
+    document.querySelector(`input[name=lang][value=${currentLang}]`).checked = true;
+
+    if (!state) return;
+
+    Object.assign(incomeData, state.incomeData);
+    ["food", "money", "research", "culture"].forEach(type => {
+      document.getElementById(`account-${type}`).value = state.accounts[type];
+      updateIncomeDisplay(type);
+    });
+
+    Object.assign(costData, state.costData);
+    ["food", "money", "research", "culture"].forEach(type => {
+      document.getElementById(`account-${type}`).value = state.accounts[type];
+      updateIncomeDisplay(type);
+    });
+
+    Object.assign(otherResourceData, state.otherResourceData);
+    ["empire_size", "votes", "ground_capacity", "space_capacity", "victory_points"].forEach(type => {
+      document.getElementById(`account-${type}`).value = state.accounts[type];
+      updateOtherResourceDisplay(type);
+    });
+
+    Object.assign(spentCapacity, state.spentCapacity || {ground_capacity: 0, space_capacity: 0});
+
+    roundNumber = state.roundNumber || 0;
+
+
+    document.getElementById("account-empire_size").textContent = state.secondary.empire;
+    document.getElementById("account-votes").textContent = state.secondary.votes;
+    document.getElementById("account-ground_capacity").setAttribute("data-base", state.secondary.ground || "0");
+    document.getElementById("account-space_capacity").setAttribute("data-base", state.secondary.space || "0");
+    document.getElementById("account-victory_points").textContent = state.secondary.vp;
+
+    updateCapacityDisplay("ground_capacity");
+    updateCapacityDisplay("space_capacity");
+
+    document.getElementById("political-action-free").value = state.political.free;
+    document.getElementById("political-action-law").value = state.political.law;
+    document.getElementById("political-action-institution").value = state.political.institution;
+    document.getElementById("political-action-government").value = state.political.government;
+    document.getElementById("political-action-contract").value = state.political.contract;
+
+    document.getElementById("food-to-awe").value = state.trade.food_awe;
+    document.getElementById("awe-to-food").value = state.trade.awe_food;
+    document.getElementById("research-to-awe").value = state.trade.research_awe;
+    document.getElementById("awe-to-research").value = state.trade.awe_research;
+    document.getElementById("culture-to-awe").value = state.trade.culture_awe;
+    document.getElementById("awe-to-culture").value = state.trade.awe_culture;
+    document.getElementById("culture-to-awe-2").value = state.trade.culture_awe2;
+    document.getElementById("awe-to-culture-2").value = state.trade.awe_culture2;
+
+    document.getElementById("action-log").value = state.log || "";
+    document.getElementById("notes").value = state.notes || "";
+    applyTranslations();
+  }
+
+  function resetState() {
+    let message = "Do you really want to reset all data?";
+    if (currentLang === "de") {
+      message = "Willst du wirklich alle Daten zurücksetzen?";
+    }
+    if (confirm(message)) {
+      localStorage.removeItem("gameState");
+      document.getElementById("action-log").value = "";
+      document.getElementById("notes").value = "";
+      initAccountsToZero();
+      initPoliticalActions();
+      initTradeRatios();
+      location.reload();
+    }
+  }
+
+  function initAccountsToZero() {
+    ["food", "money", "research", "culture"].forEach(type => {
+      const el = document.getElementById(`account-${type}`);
+      if (el) el.value = "0";
+    });
+  }
+
+  function initPoliticalActions() {
+    const el1 = document.getElementById(`political-action-free`);
+    el1.value = "1";
+
+    ["law", "institution", "government", "contract"].forEach(type => {
+      const el = document.getElementById(`political-action-${type}`);
+      if (el) el.value = "0";
+    });
+  }
+
+function initTradeRatios() {
+  ["food-to-awe", "awe-to-food", "research-to-awe", "awe-to-research"].forEach(type => {
+    const el = document.getElementById(`${type}`);
+    if (el) el.value = "5";
+  });
+
+  ["culture-to-awe", "culture-to-awe-2", "awe-to-culture", "awe-to-culture-2"].forEach(type => {
+    const el = document.getElementById(`${type}`);
+    if (el) el.value = "0";
+  });
+}
+
+  function logAction(message) {
+    const now = new Date().toLocaleTimeString('en-GB', {hour12: false});
+    const line = `[${now}] ${message}`;
+    const logArea = document.getElementById("action-log");
+    logArea.value += line + "\n";
+    logArea.scrollTop = logArea.scrollHeight;
+    saveState();
+  }
+
+  function logManualChange(input, type) {
+    const value = input.value;
+    logAction(`Manually changed account value from ${type} to ${value}`);
+  }
+
+  const resourceColors = {
+    food: "rgba(144, 238, 144, 0.3)",     // green
+    money: "rgba(255, 215, 0, 0.3)",  // gold/yellow
+    research: "rgba(135, 206, 250, 0.3)", // blue
+    culture: "rgba(221, 160, 221, 0.3)" // pink
+  };
+
+  function flashIncomeCell(resource) {
+    const span = document.getElementById(`income-${resource}`);
+    const cell = span.parentElement;
+    cell.style.backgroundColor = resourceColors[resource] || "rgba(150,150,150,0.2)";
+    setTimeout(() => {
+      cell.style.backgroundColor = "";
+    }, 500);
+  }
+
+  function flashAccountCell(resource) {
+    const span = document.getElementById(`account-${resource}`);
+    const cell = span.parentElement;
+    cell.style.backgroundColor = resourceColors[resource] || "rgba(150,150,150,0.2)";
+    setTimeout(() => {
+      cell.style.backgroundColor = "";
+    }, 500);
+  }
+
+  function adjustAccount(resource, delta) {
+    const input = document.getElementById(`account-${resource}`);
+    let value = parseInt(input.value, 10);
+    if (isNaN(value)) value = 0;
+
+    value += delta;
+    input.value = value;
+
+    logManualChange(input, resource);
+    saveState();
+  }
+
+  function adjustInput(resource, delta) {
+    const input = document.getElementById(`${resource}`);
+    let value = parseInt(input.value, 10);
+    if (isNaN(value)) value = 0;
+
+    value += delta;
+    input.value = value;
+  }
+
+  const translations = {
+    en: {
+      account: "Account",
+      add: "Add",
+      add_subtract: "Add/Subtract",
+      add_to_income: "Add to income",
+      apply_income: "Apply all Income",
+      buildings: "Buildings",
+      by: "by",
+      contract_actions: "Contract Actions",
+      contracts: "Contracts",
+      counselors: "Counselors",
+      culture: "Culture",
+      development_aid: "Development Aid",
+      empire_size: "Empire Size",
+      events: "Events",
+      favor: "Favor",
+      food: "Food",
+      free_actions: "Free Actions",
+      government_actions: "Government Actions",
+      governments: "Governments",
+      ground_capacity: "Ground Capacity",
+      home_world: "Home World",
+      income: "Income",
+      institution_actions: "Institution Actions",
+      institutions: "Institutions",
+      law_actions: "Law Actions",
+      laws: "Laws",
+      maintenance: "Maintenance",
+      money: "AWE",
+      own_notes: "Own Notes",
+      planets: "Planets",
+      political_actions: "Political Actions",
+      politics: "Politics",
+      research: "Research",
+      space_capacity: "Space Capacity",
+      spend: "Spend",
+      technologies: "Technologies",
+      trade_ratios: "Trade Ratios",
+      trade_routes: "Trade Routes",
+      units: "Units",
+      victory_points: "Victory Points",
+      votes: "Votes",
+    },
+    de: {
+      account: "Konto",
+      add: "Füge hinzu",
+      add_subtract: "Füge hinzu/ziehe ab",
+      add_to_income: "Einkommen hinzufügen",
+      apply_income: "Wende alle Einkommen an",
+      buildings: "Gebäude",
+      by: "durch",
+      contract_actions: "Vertragsaktionen",
+      contracts: "Verträge",
+      counselors: "Berater",
+      culture: "Kultur",
+      development_aid: "Entwicklungshilfe",
+      empire_size: "Staatsgröße",
+      events: "Ereignisse",
+      favor: "Gunst",
+      food: "Nahrung",
+      free_actions: "Freie Aktionen",
+      government_actions: "Regierungsaktionen",
+      governments: "Regierungen",
+      ground_capacity: "Bodenkapazität",
+      home_world: "Heimatwelt",
+      income: "Einkommen",
+      institution_actions: "Institutionsaktionen",
+      institutions: "Institutionen",
+      law_actions: "Gesetzesaktionen",
+      laws: "Gesetze",
+      maintenance: "Unterhalt",
+      money: "AWE",
+      own_notes: "Eigene Notizen",
+      planets: "Planeten",
+      political_actions: "Politische Aktionen",
+      politics: "Politiken",
+      research: "Forschung",
+      space_capacity: "Weltraumkapazität",
+      spend: "Gebe aus",
+      technologies: "Technologien",
+      trade_ratios: "Handelsverhältnisse",
+      trade_routes: "Handelsrouten",
+      units: "Einheiten",
+      victory_points: "Siegpunkte",
+      votes: "Stimmen",
+    },
+  };
+
+  function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem("lang", lang);
+    logAction("Switch language to: " + lang);
+    applyTranslations();
+  }
+
+  function applyTranslations() {
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      const key = el.getAttribute("data-i18n");
+      el.textContent = translations[currentLang][key] || key;
+    });
+
+    ["food", "money", "research", "culture"].forEach(type => {
+      updateIncomeDisplay(type);
+    });
+
+    ["empire_size", "votes", "ground_capacity", "space_capacity", "victory_points"].forEach(type => {
+      updateOtherResourceDisplay(type);
+    });
+
+  }
+</script>
+
+</body>
+</html>
