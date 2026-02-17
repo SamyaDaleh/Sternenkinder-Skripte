@@ -219,7 +219,116 @@
   </select>
   <button onclick="addToOtherResources()">OK</button>
 </div>
+
 <br>
+<br>
+
+<h3 data-i18n="build_upgrade"></h3>
+<div id="build-form">
+  <select id="build-mode" onchange="updateBuildForm()">
+    <option value="build" data-i18n="build"></option>
+    <option value="upgrade" data-i18n="upgrade"></option>
+  </select>
+
+  <select id="build-category" onchange="updateBuildForm()">
+    <option value="resource_building" data-i18n="resource_building"></option>
+    <option value="capacity_building" data-i18n="capacity_building"></option>
+    <option value="special_building" data-i18n="special_building"></option>
+    <option value="ground_unit" data-i18n="ground_unit"></option>
+    <option value="space_unit" data-i18n="space_unit"></option>
+  </select>
+
+  <span id="build-level-group">
+    <select id="build-level" onchange="updateCostPreview()"></select>
+  </span>
+
+  <span id="build-resource-type-group">
+    <select id="build-resource-type" onchange="updateCostPreview()">
+      <option value="food" data-i18n="food"></option>
+      <option value="money" data-i18n="money"></option>
+      <option value="research" data-i18n="research"></option>
+      <option value="culture" data-i18n="culture"></option>
+    </select>
+  </span>
+
+  <span id="build-special-group">
+    <select id="build-special" onchange="updateCostPreview()">
+      <option value="festung" data-i18n="festung"></option>
+      <option value="raketenbasis" data-i18n="raketenbasis"></option>
+      <option value="planetarer_schild" data-i18n="planetarer_schild"></option>
+      <option value="botschaft" data-i18n="botschaft"></option>
+      <option value="filiale" data-i18n="filiale"></option>
+      <option value="kuenstliches_tor" data-i18n="kuenstliches_tor"></option>
+      <option value="handelsroute" data-i18n="handelsroute"></option>
+      <option value="handelsroute_gefaehrlich" data-i18n="handelsroute_gefaehrlich"></option>
+      <option value="zentrum" data-i18n="zentrum"></option>
+    </select>
+  </span>
+
+  <span id="build-ground-unit-group">
+    <select id="build-ground-unit" onchange="updateCostPreview()">
+      <option value="miliz" data-i18n="miliz"></option>
+      <option value="infanterie" data-i18n="infanterie"></option>
+      <option value="schwere_infanterie" data-i18n="schwere_infanterie"></option>
+      <option value="panzer" data-i18n="panzer"></option>
+      <option value="artillerie" data-i18n="artillerie"></option>
+      <option value="kriegsdrohnen" data-i18n="kriegsdrohnen"></option>
+      <option value="luftwaffe" data-i18n="luftwaffe"></option>
+      <option value="antiorbitalgeschuetz" data-i18n="antiorbitalgeschuetz"></option>
+    </select>
+  </span>
+
+  <span id="build-space-unit-group">
+    <select id="build-space-unit" onchange="updateCostPreview()">
+      <option value="jaeger" data-i18n="jaeger"></option>
+      <option value="bomber" data-i18n="bomber"></option>
+      <option value="korvette" data-i18n="korvette"></option>
+      <option value="zerstoerer" data-i18n="zerstoerer"></option>
+      <option value="fregatte" data-i18n="fregatte"></option>
+      <option value="kreuzer" data-i18n="kreuzer"></option>
+      <option value="schlachtkreuzer" data-i18n="schlachtkreuzer"></option>
+      <option value="schlachtschiff" data-i18n="schlachtschiff"></option>
+      <option value="traeger" data-i18n="traeger"></option>
+      <option value="sternenbasis" data-i18n="sternenbasis"></option>
+      <option value="transporter" data-i18n="transporter"></option>
+      <option value="fort_jaeger" data-i18n="fort_jaeger"></option>
+      <option value="fort_bomber" data-i18n="fort_bomber"></option>
+      <option value="fort_korvette" data-i18n="fort_korvette"></option>
+      <option value="fort_zerstoerer" data-i18n="fort_zerstoerer"></option>
+      <option value="fort_fregatte" data-i18n="fort_fregatte"></option>
+      <option value="fort_kreuzer" data-i18n="fort_kreuzer"></option>
+      <option value="fort_schlachtkreuzer" data-i18n="fort_schlachtkreuzer"></option>
+      <option value="fort_schlachtschiff" data-i18n="fort_schlachtschiff"></option>
+      <option value="fort_traeger" data-i18n="fort_traeger"></option>
+      <option value="fort_sternenbasis" data-i18n="fort_sternenbasis"></option>
+      <option value="fort_transporter" data-i18n="fort_transporter"></option>
+      <option value="titan" data-i18n="titan"></option>
+      <option value="forschungsschiff" data-i18n="forschungsschiff"></option>
+      <option value="kolonieschiff" data-i18n="kolonieschiff"></option>
+    </select>
+  </span>
+
+  <span id="build-cost-preview" style="margin-left:10px; color:#666;"></span>
+
+  <br>
+  <button onclick="executeBuild()" data-i18n="build_button"></button>
+</div>
+
+<br>
+
+<h3 data-i18n="technologies_header"></h3>
+<div id="tech-checkboxes">
+  <label><input type="checkbox" id="tech-exotischer_materialienabbau" onchange="technologies.exotischer_materialienabbau=this.checked; updateCostPreview(); saveState()"> <span data-i18n="tech_exotischer_materialienabbau"></span></label><br>
+  <label><input type="checkbox" id="tech-optimierte_stadtplanung" onchange="technologies.optimierte_stadtplanung=this.checked; updateCostPreview(); saveState()"> <span data-i18n="tech_optimierte_stadtplanung"></span></label><br>
+  <label><input type="checkbox" id="tech-robotronisierung" onchange="technologies.robotronisierung=this.checked; updateCostPreview(); saveState()"> <span data-i18n="tech_robotronisierung"></span></label><br>
+</div>
+
+<br>
+
+<h3 data-i18n="laws_header"></h3>
+<div id="law-checkboxes">
+  <label><input type="checkbox" id="law-vorrang_reinmetall" onchange="laws.vorrang_reinmetall=this.checked; updateCostPreview(); saveState()"> <span data-i18n="law_vorrang_reinmetall"></span></label><br>
+</div>
 
 <br>
 <br>
@@ -291,6 +400,89 @@
   };
 
   let roundNumber = 0;
+
+  const technologies = {
+    exotischer_materialienabbau: false,
+    optimierte_stadtplanung: false,
+    robotronisierung: false
+  };
+
+  const laws = {
+    vorrang_reinmetall: false
+  };
+
+  const buildingData = {
+    resource_building: {
+      build: {
+        1: { cost: { food: 3 }, capacity: { ground_capacity: 2 }, maintenance: { food: 1 }, income_amount: 2 },
+        2: { cost: { food: 6 }, capacity: { ground_capacity: 3 }, maintenance: { food: 2 }, income_amount: 4 },
+        3: { cost: { food: 9 }, capacity: { ground_capacity: 5 }, maintenance: { food: 3 }, income_amount: 6 },
+      },
+      upgrade: {
+        "1to2": { cost: { food: 3 }, capacity_delta: { ground_capacity: 1 }, maintenance_delta: { food: 1 }, income_delta: 2 },
+        "2to3": { cost: { food: 6 }, capacity_delta: { ground_capacity: 2 }, maintenance_delta: { food: 2 }, income_delta: 2 },
+      }
+    },
+    capacity_building: {
+      build: {
+        1: { cost: { money: 3 }, capacity: { ground_capacity: 2 }, maintenance: { money: 1 }, provides_capacity: { ground_capacity: 1, space_capacity: 1 } },
+        2: { cost: { money: 6 }, capacity: { ground_capacity: 3 }, maintenance: { money: 2 }, provides_capacity: { ground_capacity: 2, space_capacity: 2 } },
+        3: { cost: { money: 9 }, capacity: { ground_capacity: 5 }, maintenance: { money: 3 }, provides_capacity: { ground_capacity: 3, space_capacity: 3 } },
+      },
+      upgrade: {
+        "1to2": { cost: { money: 3 }, capacity_delta: { ground_capacity: 1 }, maintenance_delta: { money: 1 }, capacity_provides_delta: { ground_capacity: 1, space_capacity: 1 } },
+        "2to3": { cost: { money: 3 }, capacity_delta: { ground_capacity: 2 }, maintenance_delta: { money: 1 }, capacity_provides_delta: { ground_capacity: 1, space_capacity: 1 } },
+      }
+    },
+    special: {
+      festung:           { cost: { food: 5 }, capacity: { ground_capacity: 3 } },
+      raketenbasis:      { cost: { food: 3 }, capacity: { ground_capacity: 2 }, maintenance: { food: 1 } },
+      planetarer_schild: { cost: { food: 3 }, capacity: { ground_capacity: 2 }, maintenance: { food: 1 } },
+      botschaft:         { cost: { food: 6 }, capacity: { ground_capacity: 3 }, maintenance: { food: 2 } },
+      filiale:           { cost: { food: 0, money: 0 }, capacity: { ground_capacity: 1 } },
+      kuenstliches_tor:  { cost: { money: 6 }, capacity: { space_capacity: 1 } },
+      handelsroute:              { cost: { money: 6 }, capacity: { space_capacity: 1 } },
+      handelsroute_gefaehrlich:  { cost: { money: 10 }, capacity: { space_capacity: 1 } },
+      zentrum:           { cost: { food: 6 }, capacity: { ground_capacity: 3 }, maintenance: { food: 2 } },
+    },
+    ground_unit: {
+      miliz:                { cost: {}, capacity: { ground_capacity: 1 } },
+      infanterie:           { cost: { food: 1 }, capacity: { ground_capacity: 1 } },
+      schwere_infanterie:   { cost: { food: 2 }, capacity: { ground_capacity: 1 } },
+      panzer:               { cost: { food: 3 }, capacity: { ground_capacity: 1 } },
+      artillerie:           { cost: { food: 4 }, capacity: { ground_capacity: 1 } },
+      kriegsdrohnen:        { cost: { food: 2 }, capacity: { ground_capacity: 1 } },
+      luftwaffe:            { cost: { food: 5 }, capacity: { ground_capacity: 1 } },
+      antiorbitalgeschuetz: { cost: { food: 5 }, capacity: { ground_capacity: 1 }, maintenance: { food: 2 } },
+    },
+    space_unit: {
+      jaeger:                        { cost: { money: 1 }, capacity: { space_capacity: 1 } },
+      bomber:                        { cost: { money: 1 }, capacity: { space_capacity: 1 } },
+      korvette:                      { cost: { money: 3 }, capacity: { space_capacity: 1 }, note: "korvette_note" },
+      zerstoerer:                    { cost: { money: 5 }, capacity: { space_capacity: 2 }, note: "zerstoerer_note" },
+      fregatte:                      { cost: { money: 5 }, capacity: { space_capacity: 2 }, note: "fregatte_note" },
+      kreuzer:                       { cost: { money: 8 }, capacity: { space_capacity: 2 }, maintenance: { money: 1 } },
+      schlachtkreuzer:               { cost: { money: 10 }, capacity: { space_capacity: 2 }, maintenance: { money: 2 } },
+      schlachtschiff:                { cost: { money: 14 }, capacity: { space_capacity: 3 }, maintenance: { money: 3 } },
+      traeger:                       { cost: { money: 7 }, capacity: { space_capacity: 4 }, maintenance: { money: 2 } },
+      sternenbasis:                  { cost: { money: 8 }, capacity: { space_capacity: 3 }, maintenance: { money: 1 }, provides_capacity: { space_capacity: 1 } },
+      transporter:                   { cost: { money: 2 }, capacity: { space_capacity: 1 } },
+      fort_jaeger:                   { cost: { money: 2 }, capacity: { space_capacity: 1 } },
+      fort_bomber:                   { cost: { money: 2 }, capacity: { space_capacity: 1 } },
+      fort_korvette:                 { cost: { money: 4 }, capacity: { space_capacity: 1 }, note: "fort_korvette_note" },
+      fort_zerstoerer:               { cost: { money: 6 }, capacity: { space_capacity: 2 }, maintenance: { money: 1 } },
+      fort_fregatte:                 { cost: { money: 6 }, capacity: { space_capacity: 2 }, maintenance: { money: 1 } },
+      fort_kreuzer:                  { cost: { money: 8 }, capacity: { space_capacity: 2 }, maintenance: { money: 1 } },
+      fort_schlachtkreuzer:          { cost: { money: 12 }, capacity: { space_capacity: 2 }, maintenance: { money: 3 } },
+      fort_schlachtschiff:           { cost: { money: 16 }, capacity: { space_capacity: 4 }, maintenance: { money: 3 } },
+      fort_traeger:                  { cost: { money: 9 }, capacity: { space_capacity: 4 }, maintenance: { money: 3 } },
+      fort_sternenbasis:             { cost: { money: 10 }, capacity: { space_capacity: 6 }, maintenance: { money: 2 }, provides_capacity: { space_capacity: 2 } },
+      fort_transporter:              { cost: { money: 8 }, capacity: { space_capacity: 2 } },
+      titan:                         { cost: { money: 20 }, capacity: { space_capacity: 6 }, maintenance: { money: 4 } },
+      forschungsschiff:              { cost: { food: 3 }, capacity: { space_capacity: 1 }, note: "forschungsschiff_note" },
+      kolonieschiff:                 { cost: { food: 5 }, capacity: { space_capacity: 1 }, maintenance: { food: 1 } },
+    },
+  };
 
   function updateSpentFromSlider(type, value) {
     const newSpent = parseInt(value, 10);
@@ -479,8 +671,13 @@
         awe_culture2: document.getElementById("awe-to-culture-2").value
       },
       log: document.getElementById("action-log").value,
-      notes: document.getElementById("notes").value
-
+      notes: document.getElementById("notes").value,
+      technologies: {
+        exotischer_materialienabbau: document.getElementById("tech-exotischer_materialienabbau").checked,
+        optimierte_stadtplanung: document.getElementById("tech-optimierte_stadtplanung").checked,
+        robotronisierung: document.getElementById("tech-robotronisierung").checked,
+      },
+      laws: laws,
     };
     localStorage.setItem("gameState", JSON.stringify(state));
   }
@@ -546,7 +743,23 @@
 
     document.getElementById("action-log").value = state.log || "";
     document.getElementById("notes").value = state.notes || "";
+
+    // Restore technologies
+    if (state.technologies) {
+      Object.assign(technologies, state.technologies);
+      document.getElementById("tech-exotischer_materialienabbau").checked = technologies.exotischer_materialienabbau;
+      document.getElementById("tech-optimierte_stadtplanung").checked = technologies.optimierte_stadtplanung;
+      document.getElementById("tech-robotronisierung").checked = technologies.robotronisierung;
+    }
+
+    // Restore laws
+    if (state.laws) {
+      Object.assign(laws, state.laws);
+      document.getElementById("law-vorrang_reinmetall").checked = !!laws.vorrang_reinmetall;
+    }
+
     applyTranslations();
+    updateBuildForm();
   }
 
   function resetState() {
@@ -561,8 +774,24 @@
       initAccountsToZero();
       initPoliticalActions();
       initTradeRatios();
+      resetTechnologies();
+      resetLaws();
       location.reload();
     }
+  }
+
+  function resetTechnologies() {
+    technologies.exotischer_materialienabbau = false;
+    technologies.optimierte_stadtplanung = false;
+    technologies.robotronisierung = false;
+    document.getElementById("tech-exotischer_materialienabbau").checked = false;
+    document.getElementById("tech-optimierte_stadtplanung").checked = false;
+    document.getElementById("tech-robotronisierung").checked = false;
+  }
+
+  function resetLaws() {
+    laws.vorrang_reinmetall = false;
+    document.getElementById("law-vorrang_reinmetall").checked = false;
   }
 
   function initAccountsToZero() {
@@ -654,6 +883,331 @@ function initTradeRatios() {
     input.value = value;
   }
 
+  function updateBuildForm() {
+    const mode = document.getElementById("build-mode").value;
+    const categorySelect = document.getElementById("build-category");
+
+    // Show/hide category options based on mode
+    const allCategories = ["resource_building", "capacity_building", "special_building", "ground_unit", "space_unit"];
+    const upgradeOnly = ["resource_building", "capacity_building"];
+    allCategories.forEach(cat => {
+      const opt = categorySelect.querySelector(`option[value="${cat}"]`);
+      if (mode === "upgrade" && !upgradeOnly.includes(cat)) {
+        opt.style.display = "none";
+        if (categorySelect.value === cat) {
+          categorySelect.value = "resource_building";
+        }
+      } else {
+        opt.style.display = "";
+      }
+    });
+
+    const category = categorySelect.value;
+    const levelGroup = document.getElementById("build-level-group");
+    const resourceTypeGroup = document.getElementById("build-resource-type-group");
+    const specialGroup = document.getElementById("build-special-group");
+    const groundUnitGroup = document.getElementById("build-ground-unit-group");
+    const spaceUnitGroup = document.getElementById("build-space-unit-group");
+
+    // Hide all optional groups
+    levelGroup.style.display = "none";
+    resourceTypeGroup.style.display = "none";
+    specialGroup.style.display = "none";
+    groundUnitGroup.style.display = "none";
+    spaceUnitGroup.style.display = "none";
+
+    const levelSelect = document.getElementById("build-level");
+
+    if (category === "resource_building" || category === "capacity_building") {
+      levelGroup.style.display = "";
+      if (category === "resource_building") {
+        resourceTypeGroup.style.display = "";
+      }
+      // Populate level options based on mode
+      levelSelect.innerHTML = "";
+      if (mode === "build") {
+        [1, 2, 3].forEach(l => {
+          const opt = document.createElement("option");
+          opt.value = l;
+          opt.textContent = "Level " + l;
+          levelSelect.appendChild(opt);
+        });
+      } else {
+        [["1to2", "1 → 2"], ["2to3", "2 → 3"]].forEach(([val, label]) => {
+          const opt = document.createElement("option");
+          opt.value = val;
+          opt.textContent = label;
+          levelSelect.appendChild(opt);
+        });
+      }
+    } else if (category === "special_building") {
+      specialGroup.style.display = "";
+    } else if (category === "ground_unit") {
+      groundUnitGroup.style.display = "";
+    } else if (category === "space_unit") {
+      spaceUnitGroup.style.display = "";
+    }
+
+    updateCostPreview();
+  }
+
+  function updateCostPreview() {
+    const info = getBuildInfo();
+    if (!info) {
+      document.getElementById("build-cost-preview").textContent = "";
+      return;
+    }
+    const parts = [];
+    for (const [res, amount] of Object.entries(info.cost)) {
+      if (amount !== 0) {
+        const name = translations[currentLang][res] || res;
+        parts.push(`${name}: -${amount}`);
+      }
+    }
+    if (info.capacityCost) {
+      for (const [cap, amount] of Object.entries(info.capacityCost)) {
+        const name = translations[currentLang][cap] || cap;
+        parts.push(`${name}: -${amount}`);
+      }
+    }
+    const maintLabel = translations[currentLang]["maintenance"] || "Maintenance";
+    if (info.maintenanceEntries) {
+      for (const [res, amount] of Object.entries(info.maintenanceEntries)) {
+        if (amount !== 0) {
+          const name = translations[currentLang][res] || res;
+          parts.push(`${maintLabel} ${name}: -${amount}`);
+        }
+      }
+    }
+    let preview = parts.length > 0 ? ("(" + parts.join(", ") + ")") : "";
+    if (info.data && info.data.note) {
+      const noteText = translations[currentLang][info.data.note] || info.data.note;
+      preview += (preview ? " " : "") + noteText;
+    }
+    document.getElementById("build-cost-preview").textContent = preview;
+  }
+
+  function getBuildInfo() {
+    const mode = document.getElementById("build-mode").value;
+    const category = document.getElementById("build-category").value;
+    const level = document.getElementById("build-level").value;
+    const resourceType = document.getElementById("build-resource-type").value;
+
+    let data, cost, capacityCost, maintenanceEntries, incomeEntries, label;
+
+    if (category === "resource_building" || category === "capacity_building") {
+      const catData = buildingData[category];
+      if (mode === "build") {
+        data = catData.build[parseInt(level)];
+        if (!data) return null;
+        cost = { ...data.cost };
+        capacityCost = data.capacity ? { ...data.capacity } : {};
+        maintenanceEntries = {};
+        if (data.maintenance) {
+          for (const [res, val] of Object.entries(data.maintenance)) {
+            maintenanceEntries[res] = val;
+          }
+        }
+        incomeEntries = {};
+        if (data.income_amount && category === "resource_building") {
+          incomeEntries[resourceType] = data.income_amount;
+        }
+        if (data.provides_capacity) {
+          // capacity buildings provide extra capacity
+        }
+        label = `${translations[currentLang][category] || category} Level ${level} (${translations[currentLang][resourceType] || resourceType})`;
+      } else {
+        data = catData.upgrade[level];
+        if (!data) return null;
+        cost = { ...data.cost };
+        capacityCost = data.capacity_delta ? { ...data.capacity_delta } : {};
+        maintenanceEntries = {};
+        if (data.maintenance_delta) {
+          for (const [res, val] of Object.entries(data.maintenance_delta)) {
+            maintenanceEntries[res] = val;
+          }
+        }
+        incomeEntries = {};
+        if (data.income_delta && category === "resource_building") {
+          incomeEntries[resourceType] = data.income_delta;
+        }
+        label = `${translations[currentLang][category] || category} ${level.replace("to", " → ")} (${translations[currentLang][resourceType] || resourceType})`;
+      }
+
+      // Food resource buildings have no maintenance
+      if (category === "resource_building" && resourceType === "food") {
+        for (const res in maintenanceEntries) {
+          maintenanceEntries[res] = 0;
+        }
+      }
+
+      // Apply technology modifiers for resource buildings
+      if (category === "resource_building") {
+        if (technologies.exotischer_materialienabbau) {
+          if (!incomeEntries[resourceType]) incomeEntries[resourceType] = 0;
+          incomeEntries[resourceType] += 1;
+        }
+        if (technologies.optimierte_stadtplanung) {
+          for (const res in maintenanceEntries) {
+            maintenanceEntries[res] = Math.max(1, maintenanceEntries[res] - 1);
+          }
+        }
+      }
+      if (category === "capacity_building" && technologies.robotronisierung) {
+        for (const res in maintenanceEntries) {
+          maintenanceEntries[res] = Math.max(1, maintenanceEntries[res] - 1);
+        }
+      }
+
+      return { cost, capacityCost, maintenanceEntries, incomeEntries, label, category, data, mode };
+
+    } else if (category === "special_building") {
+      const specialType = document.getElementById("build-special").value;
+      data = buildingData.special[specialType];
+      if (!data) return null;
+      cost = { ...data.cost };
+      capacityCost = data.capacity ? { ...data.capacity } : {};
+      maintenanceEntries = {};
+      if (data.maintenance) {
+        for (const [res, val] of Object.entries(data.maintenance)) {
+          maintenanceEntries[res] = val;
+        }
+      }
+      label = translations[currentLang][specialType] || specialType;
+      return { cost, capacityCost, maintenanceEntries, incomeEntries: {}, label, category, data, mode: "build" };
+
+    } else if (category === "ground_unit") {
+      const unitType = document.getElementById("build-ground-unit").value;
+      data = buildingData.ground_unit[unitType];
+      if (!data) return null;
+      cost = { ...data.cost };
+      capacityCost = data.capacity ? { ...data.capacity } : {};
+      maintenanceEntries = {};
+      if (data.maintenance) {
+        for (const [res, val] of Object.entries(data.maintenance)) {
+          maintenanceEntries[res] = val;
+        }
+      }
+      label = translations[currentLang][unitType] || unitType;
+      return { cost, capacityCost, maintenanceEntries, incomeEntries: {}, label, category, data, mode: "build" };
+
+    } else if (category === "space_unit") {
+      const unitType = document.getElementById("build-space-unit").value;
+      data = buildingData.space_unit[unitType];
+      if (!data) return null;
+      cost = { ...data.cost };
+      capacityCost = data.capacity ? { ...data.capacity } : {};
+      maintenanceEntries = {};
+      if (data.maintenance) {
+        for (const [res, val] of Object.entries(data.maintenance)) {
+          maintenanceEntries[res] = val;
+        }
+      }
+      // Apply law: Vorrang für Reinmetall — all ships cost -1 AWE (min 1)
+      if (laws.vorrang_reinmetall && cost.money) {
+        cost.money = Math.max(1, cost.money - 1);
+      }
+
+      label = translations[currentLang][unitType] || unitType;
+      return { cost, capacityCost, maintenanceEntries, incomeEntries: {}, label, category, data, mode: "build" };
+    }
+
+    return null;
+  }
+
+  function executeBuild() {
+    const info = getBuildInfo();
+    if (!info) {
+      alert("Invalid selection.");
+      return;
+    }
+
+    const { cost, capacityCost, maintenanceEntries, incomeEntries, label, category, data, mode } = info;
+
+    // Validate resources
+    for (const [res, amount] of Object.entries(cost)) {
+      if (amount === 0) continue;
+      const accountEl = document.getElementById(`account-${res}`);
+      if (!accountEl) continue;
+      const current = parseInt(accountEl.value, 10) || 0;
+      if (current < amount) {
+        const resName = translations[currentLang][res] || res;
+        alert(`${translations[currentLang]["not_enough_resources"] || "Not enough resources"}: ${resName} (${current} < ${amount})`);
+        return;
+      }
+    }
+
+    // Validate capacity
+    for (const [capType, amount] of Object.entries(capacityCost)) {
+      const baseEl = document.getElementById(`account-${capType}`);
+      if (!baseEl) continue;
+      const base = parseInt(baseEl.getAttribute("data-base"), 10) || 0;
+      const spent = spentCapacity[capType] || 0;
+      const available = base - spent;
+      if (available < amount) {
+        const capName = translations[currentLang][capType] || capType;
+        alert(`${translations[currentLang]["not_enough_capacity"] || "Not enough capacity"}: ${capName} (${available} < ${amount})`);
+        return;
+      }
+    }
+
+    // Deduct resource costs from accounts
+    for (const [res, amount] of Object.entries(cost)) {
+      if (amount === 0) continue;
+      const accountEl = document.getElementById(`account-${res}`);
+      if (!accountEl) continue;
+      const current = parseInt(accountEl.value, 10) || 0;
+      accountEl.value = current - amount;
+    }
+
+    // Deduct capacity (increment spent)
+    for (const [capType, amount] of Object.entries(capacityCost)) {
+      spentCapacity[capType] = (spentCapacity[capType] || 0) + amount;
+      updateCapacityDisplay(capType);
+    }
+
+    // Add maintenance to costData
+    const maintenanceSource = (category === "ground_unit" || category === "space_unit") ? "units" : "buildings";
+    for (const [res, amount] of Object.entries(maintenanceEntries)) {
+      if (!costData[res]) costData[res] = {};
+      if (!costData[res][maintenanceSource]) costData[res][maintenanceSource] = 0;
+      costData[res][maintenanceSource] -= amount; // costData is negative for maintenance
+      updateIncomeDisplay(res);
+    }
+
+    // Add income to incomeData
+    for (const [res, amount] of Object.entries(incomeEntries)) {
+      if (!incomeData[res]) incomeData[res] = {};
+      if (!incomeData[res].buildings) incomeData[res].buildings = 0;
+      incomeData[res].buildings += amount;
+      updateIncomeDisplay(res);
+    }
+
+    // Buildings/units that provide additional capacity
+    if (data.provides_capacity) {
+      for (const [capType, amount] of Object.entries(data.provides_capacity)) {
+        if (!otherResourceData[capType]) otherResourceData[capType] = {};
+        if (!otherResourceData[capType].buildings) otherResourceData[capType].buildings = 0;
+        otherResourceData[capType].buildings += amount;
+        updateOtherResourceDisplay(capType);
+      }
+    }
+    if (data.capacity_provides_delta) {
+      for (const [capType, amount] of Object.entries(data.capacity_provides_delta)) {
+        if (!otherResourceData[capType]) otherResourceData[capType] = {};
+        if (!otherResourceData[capType].buildings) otherResourceData[capType].buildings = 0;
+        otherResourceData[capType].buildings += amount;
+        updateOtherResourceDisplay(capType);
+      }
+    }
+
+    // Log the action
+    const modeLabel = translations[currentLang][mode] || mode;
+    logAction(`${modeLabel}: ${label}`);
+
+    saveState();
+  }
+
   const translations = {
     en: {
       account: "Account",
@@ -697,6 +1251,72 @@ function initTradeRatios() {
       units: "Units",
       victory_points: "Victory Points",
       votes: "Votes",
+      build_upgrade: "Build / Upgrade",
+      build: "Build",
+      upgrade: "Upgrade",
+      resource_building: "Resource Building",
+      capacity_building: "Capacity Building",
+      special_building: "Special Building",
+      ground_unit: "Ground Unit",
+      space_unit: "Space Unit",
+      produces_food: "Produces Food",
+      build_button: "Build!",
+      technologies_header: "Technologies",
+      tech_exotischer_materialienabbau: "Exotischer Materialienabbau (resource building income +1)",
+      tech_optimierte_stadtplanung: "Optimierte Stadtplanung (resource building maintenance -1)",
+      tech_robotronisierung: "Robotronisierung (capacity building maintenance -1)",
+      laws_header: "Laws",
+      placeholder_laws: "(To be added later)",
+      festung: "Festung",
+      raketenbasis: "Raketenbasis",
+      planetarer_schild: "Planetarer Schild",
+      botschaft: "Botschaft",
+      filiale: "Filiale",
+      kuenstliches_tor: "Artificial Gate",
+      handelsroute: "Trade Route",
+      handelsroute_gefaehrlich: "Trade Route (dangerous)",
+      zentrum: "Center",
+      miliz: "Militia",
+      infanterie: "Infantry",
+      schwere_infanterie: "Heavy Infantry",
+      panzer: "Tank",
+      artillerie: "Artillery",
+      kriegsdrohnen: "War Drones",
+      luftwaffe: "Air Force",
+      antiorbitalgeschuetz: "Anti-Orbital Gun",
+      jaeger: "Fighter",
+      bomber: "Bomber",
+      korvette: "Corvette",
+      zerstoerer: "Destroyer",
+      fregatte: "Frigate",
+      kreuzer: "Cruiser",
+      schlachtkreuzer: "Battlecruiser",
+      schlachtschiff: "Battleship",
+      traeger: "Carrier",
+      sternenbasis: "Starbase",
+      transporter: "Transport",
+      fort_jaeger: "Adv. Fighter",
+      fort_bomber: "Adv. Bomber",
+      fort_korvette: "Adv. Corvette",
+      fort_zerstoerer: "Adv. Destroyer",
+      fort_fregatte: "Adv. Frigate",
+      fort_kreuzer: "Adv. Cruiser",
+      fort_schlachtkreuzer: "Adv. Battlecruiser",
+      fort_schlachtschiff: "Adv. Battleship",
+      fort_traeger: "Adv. Carrier",
+      fort_sternenbasis: "Adv. Starbase",
+      fort_transporter: "Adv. Transport",
+      titan: "Titan",
+      forschungsschiff: "Research Ship",
+      kolonieschiff: "Colony Ship",
+      korvette_note: "Note: 1 AWE maintenance per 3 ships",
+      zerstoerer_note: "Note: 1 AWE maintenance per 2 ships",
+      fregatte_note: "Note: 1 AWE maintenance per 2 ships",
+      fort_korvette_note: "Note: 1 AWE maintenance per 2 ships",
+      forschungsschiff_note: "Note: 1 food maintenance per 3 ships",
+      law_vorrang_reinmetall: "Vorrang für Reinmetall (ship AWE cost -1)",
+      not_enough_resources: "Not enough resources",
+      not_enough_capacity: "Not enough capacity",
     },
     de: {
       account: "Konto",
@@ -740,6 +1360,72 @@ function initTradeRatios() {
       units: "Einheiten",
       victory_points: "Siegpunkte",
       votes: "Stimmen",
+      build_upgrade: "Bauen / Aufwerten",
+      build: "Bauen",
+      upgrade: "Aufwerten",
+      resource_building: "Ressourcengebäude",
+      capacity_building: "Kapazitätsgebäude",
+      special_building: "Spezialgebäude",
+      ground_unit: "Bodeneinheit",
+      space_unit: "Weltraumeinheit",
+      produces_food: "Produziert Nahrung",
+      build_button: "Bauen!",
+      technologies_header: "Technologien",
+      tech_exotischer_materialienabbau: "Exotischer Materialienabbau (Ressourcengebäude Einkommen +1)",
+      tech_optimierte_stadtplanung: "Optimierte Stadtplanung (Ressourcengebäude Unterhalt -1)",
+      tech_robotronisierung: "Robotronisierung (Kapazitätsgebäude Unterhalt -1)",
+      laws_header: "Gesetze",
+      placeholder_laws: "(Wird später ergänzt)",
+      festung: "Festung",
+      raketenbasis: "Raketenbasis",
+      planetarer_schild: "Planetarer Schild",
+      botschaft: "Botschaft",
+      filiale: "Filiale",
+      kuenstliches_tor: "Künstliches Tor",
+      handelsroute: "Handelsroute",
+      handelsroute_gefaehrlich: "Handelsroute (gefährlich)",
+      zentrum: "Zentrum",
+      miliz: "Miliz",
+      infanterie: "Infanterie",
+      schwere_infanterie: "Schwere Infanterie",
+      panzer: "Panzer",
+      artillerie: "Artillerie",
+      kriegsdrohnen: "Kriegsdrohnen",
+      luftwaffe: "Luftwaffe",
+      antiorbitalgeschuetz: "Antiorbitalgeschütz",
+      jaeger: "Jäger",
+      bomber: "Bomber",
+      korvette: "Korvette",
+      zerstoerer: "Zerstörer",
+      fregatte: "Fregatte",
+      kreuzer: "Kreuzer",
+      schlachtkreuzer: "Schlachtkreuzer",
+      schlachtschiff: "Schlachtschiff",
+      traeger: "Träger",
+      sternenbasis: "Sternenbasis",
+      transporter: "Transporter",
+      fort_jaeger: "Fortschr. Jäger",
+      fort_bomber: "Fortschr. Bomber",
+      fort_korvette: "Fortschr. Korvette",
+      fort_zerstoerer: "Fortschr. Zerstörer",
+      fort_fregatte: "Fortschr. Fregatte",
+      fort_kreuzer: "Fortschr. Kreuzer",
+      fort_schlachtkreuzer: "Fortschr. Schlachtkreuzer",
+      fort_schlachtschiff: "Fortschr. Schlachtschiff",
+      fort_traeger: "Fortschr. Träger",
+      fort_sternenbasis: "Fortschr. Sternenbasis",
+      fort_transporter: "Fortschr. Transporter",
+      titan: "Titan",
+      forschungsschiff: "Forschungsschiff",
+      kolonieschiff: "Kolonieschiff",
+      korvette_note: "Hinweis: 1 AWE Unterhalt pro 3 Schiffe",
+      zerstoerer_note: "Hinweis: 1 AWE Unterhalt pro 2 Schiffe",
+      fregatte_note: "Hinweis: 1 AWE Unterhalt pro 2 Schiffe",
+      fort_korvette_note: "Hinweis: 1 AWE Unterhalt pro 2 Schiffe",
+      forschungsschiff_note: "Hinweis: 1 Nahrung Unterhalt pro 3 Schiffe",
+      law_vorrang_reinmetall: "Vorrang für Reinmetall (Schiff AWE-Kosten -1)",
+      not_enough_resources: "Nicht genug Ressourcen",
+      not_enough_capacity: "Nicht genug Kapazität",
     },
   };
 
@@ -764,6 +1450,10 @@ function initTradeRatios() {
       updateOtherResourceDisplay(type);
     });
 
+    // Re-apply build form translations
+    if (document.getElementById("build-form")) {
+      updateBuildForm();
+    }
   }
 </script>
 
