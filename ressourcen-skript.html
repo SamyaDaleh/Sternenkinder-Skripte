@@ -328,6 +328,16 @@
 <h3 data-i18n="laws_header"></h3>
 <div id="law-checkboxes">
   <label><input type="checkbox" id="law-vorrang_reinmetall" onchange="laws.vorrang_reinmetall=this.checked; updateCostPreview(); saveState()"> <span data-i18n="law_vorrang_reinmetall"></span></label><br>
+  <label style="margin-left:20px"><input type="checkbox" id="law-druckmittel_reinmetall" onchange="laws.druckmittel_reinmetall=this.checked; updateCostPreview(); saveState()"> <span data-i18n="law_druckmittel_reinmetall"></span></label><br>
+  <span data-i18n="law_abruestung_erzwingen"></span>: <button type="button" onclick="adjustLaw('abruestung_erzwingen', -1)">–</button> <span id="law-abruestung_erzwingen-display">0</span> <button type="button" onclick="adjustLaw('abruestung_erzwingen', 1)">+</button><br>
+  <label><input type="checkbox" id="law-gerechter_krieg" onchange="laws.gerechter_krieg=this.checked; updateCostPreview(); saveState()"> <span data-i18n="law_gerechter_krieg"></span></label><br>
+  <label><input type="checkbox" id="law-kriegskodex" onchange="laws.kriegskodex=this.checked; updateCostPreview(); saveState()"> <span data-i18n="law_kriegskodex"></span></label><br>
+  <label><input type="checkbox" id="law-sklavenarbeit" onchange="laws.sklavenarbeit=this.checked; updateCostPreview(); saveState()"> <span data-i18n="law_sklavenarbeit"></span></label><br>
+  <span data-i18n="law_oekonomische_fusion"></span>: <button type="button" onclick="adjustLaw('oekonomische_fusion', -1)">–</button> <span id="law-oekonomische_fusion-display">0</span> <button type="button" onclick="adjustLaw('oekonomische_fusion', 1)">+</button><br>
+  <label><input type="checkbox" id="law-form_partnerschaft" onchange="laws.form_partnerschaft=this.checked; updateCostPreview(); saveState()"> <span data-i18n="law_form_partnerschaft"></span></label><br>
+  <label><input type="checkbox" id="law-mobilitaetsreform" onchange="laws.mobilitaetsreform=this.checked; updateCostPreview(); saveState()"> <span data-i18n="law_mobilitaetsreform"></span></label><br>
+  <label><input type="checkbox" id="law-freie_forschung" onchange="laws.freie_forschung=this.checked; updateCostPreview(); saveState()"> <span data-i18n="law_freie_forschung"></span></label><br>
+  <label><input type="checkbox" id="law-transmutation" onchange="laws.transmutation=this.checked; updateCostPreview(); saveState()"> <span data-i18n="law_transmutation"></span></label><br>
 </div>
 
 <br>
@@ -408,7 +418,17 @@
   };
 
   const laws = {
-    vorrang_reinmetall: false
+    vorrang_reinmetall: false,
+    druckmittel_reinmetall: false,
+    abruestung_erzwingen: 0,
+    gerechter_krieg: false,
+    kriegskodex: false,
+    sklavenarbeit: false,
+    oekonomische_fusion: 0,
+    form_partnerschaft: false,
+    mobilitaetsreform: false,
+    freie_forschung: false,
+    transmutation: false,
   };
 
   const buildingData = {
@@ -755,7 +775,16 @@
     // Restore laws
     if (state.laws) {
       Object.assign(laws, state.laws);
-      document.getElementById("law-vorrang_reinmetall").checked = !!laws.vorrang_reinmetall;
+      ["vorrang_reinmetall", "druckmittel_reinmetall", "gerechter_krieg", "kriegskodex",
+       "sklavenarbeit", "form_partnerschaft", "mobilitaetsreform", "freie_forschung", "transmutation"
+      ].forEach(key => {
+        const el = document.getElementById(`law-${key}`);
+        if (el) el.checked = !!laws[key];
+      });
+      ["abruestung_erzwingen", "oekonomische_fusion"].forEach(key => {
+        const el = document.getElementById(`law-${key}-display`);
+        if (el) el.textContent = laws[key] || 0;
+      });
     }
 
     applyTranslations();
@@ -790,8 +819,21 @@
   }
 
   function resetLaws() {
-    laws.vorrang_reinmetall = false;
-    document.getElementById("law-vorrang_reinmetall").checked = false;
+    Object.assign(laws, {
+      vorrang_reinmetall: false, druckmittel_reinmetall: false, abruestung_erzwingen: 0,
+      gerechter_krieg: false, kriegskodex: false, sklavenarbeit: false, oekonomische_fusion: 0,
+      form_partnerschaft: false, mobilitaetsreform: false, freie_forschung: false, transmutation: false,
+    });
+    ["vorrang_reinmetall", "druckmittel_reinmetall", "gerechter_krieg", "kriegskodex",
+     "sklavenarbeit", "form_partnerschaft", "mobilitaetsreform", "freie_forschung", "transmutation"
+    ].forEach(key => {
+      const el = document.getElementById(`law-${key}`);
+      if (el) el.checked = false;
+    });
+    ["abruestung_erzwingen", "oekonomische_fusion"].forEach(key => {
+      const el = document.getElementById(`law-${key}-display`);
+      if (el) el.textContent = 0;
+    });
   }
 
   function initAccountsToZero() {
@@ -881,6 +923,13 @@ function initTradeRatios() {
 
     value += delta;
     input.value = value;
+  }
+
+  function adjustLaw(law, delta) {
+    laws[law] = Math.max(0, (laws[law] || 0) + delta);
+    document.getElementById(`law-${law}-display`).textContent = laws[law];
+    updateCostPreview();
+    saveState();
   }
 
   function updateBuildForm() {
@@ -979,6 +1028,15 @@ function initTradeRatios() {
         }
       }
     }
+    const incomeLabel = translations[currentLang]["income"] || "Income";
+    if (info.incomeEntries) {
+      for (const [res, amount] of Object.entries(info.incomeEntries)) {
+        if (amount !== 0) {
+          const name = translations[currentLang][res] || res;
+          parts.push(`${incomeLabel} ${name}: +${amount}`);
+        }
+      }
+    }
     let preview = parts.length > 0 ? ("(" + parts.join(", ") + ")") : "";
     if (info.data && info.data.note) {
       const noteText = translations[currentLang][info.data.note] || info.data.note;
@@ -1034,28 +1092,79 @@ function initTradeRatios() {
         label = `${translations[currentLang][category] || category} ${level.replace("to", " → ")} (${translations[currentLang][resourceType] || resourceType})`;
       }
 
-      // Food resource buildings have no maintenance
-      if (category === "resource_building" && resourceType === "food") {
-        for (const res in maintenanceEntries) {
-          maintenanceEntries[res] = 0;
+      if (category === "resource_building") {
+        const isFood = resourceType === "food";
+        const isResearch = resourceType === "research";
+
+        // Food buildings have no maintenance
+        if (isFood) {
+          for (const res in maintenanceEntries) maintenanceEntries[res] = 0;
+        }
+
+        // Exotischer Materialienabbau: +1 income
+        if (technologies.exotischer_materialienabbau) {
+          incomeEntries[resourceType] = (incomeEntries[resourceType] || 0) + 1;
+        }
+
+        // Maintenance reduction: Optimierte Stadtplanung and/or Freie Forschung
+        // Combined effect allows reaching 0; each alone is min 1
+        if (!isFood) {
+          let reduction = 0;
+          if (technologies.optimierte_stadtplanung) reduction += 1;
+          if (laws.freie_forschung && isResearch) reduction += 1;
+          if (reduction > 0) {
+            const minMaint = (technologies.optimierte_stadtplanung && laws.freie_forschung && isResearch) ? 0 : 1;
+            for (const res in maintenanceEntries) {
+              maintenanceEntries[res] = Math.max(minMaint, maintenanceEntries[res] - reduction);
+            }
+          }
+        }
+
+        // Freie Forschung: +2 research income for research buildings
+        if (laws.freie_forschung && isResearch) {
+          incomeEntries.research = (incomeEntries.research || 0) + 2;
+        }
+
+        // Transmutation: food or money buildings +2 income
+        if (laws.transmutation && (isFood || resourceType === "money")) {
+          incomeEntries[resourceType] = (incomeEntries[resourceType] || 0) + 2;
+        }
+
+        // Ökonomische Fusion: +member_count income
+        if (laws.oekonomische_fusion > 0) {
+          incomeEntries[resourceType] = (incomeEntries[resourceType] || 0) + laws.oekonomische_fusion;
+        }
+
+        // Form-Partnerschaft: get back 1 per 3 spent
+        if (laws.form_partnerschaft) {
+          for (const res in cost) {
+            cost[res] = Math.max(0, cost[res] - Math.floor(cost[res] / 3));
+          }
         }
       }
 
-      // Apply technology modifiers for resource buildings
-      if (category === "resource_building") {
-        if (technologies.exotischer_materialienabbau) {
-          if (!incomeEntries[resourceType]) incomeEntries[resourceType] = 0;
-          incomeEntries[resourceType] += 1;
-        }
-        if (technologies.optimierte_stadtplanung) {
+      if (category === "capacity_building") {
+        // Robotronisierung: -1 maintenance (min 1)
+        if (technologies.robotronisierung) {
           for (const res in maintenanceEntries) {
             maintenanceEntries[res] = Math.max(1, maintenanceEntries[res] - 1);
           }
         }
-      }
-      if (category === "capacity_building" && technologies.robotronisierung) {
-        for (const res in maintenanceEntries) {
-          maintenanceEntries[res] = Math.max(1, maintenanceEntries[res] - 1);
+
+        // Kriegskodex: -1 AWE cost, +2/4/6 culture income by level
+        if (laws.kriegskodex) {
+          if (cost.money) cost.money = Math.max(0, cost.money - 1);
+          const cultureIncome = mode === "build"
+            ? ({ 1: 2, 2: 4, 3: 6 })[parseInt(level)] || 0
+            : 2; // upgrade always adds 2 culture (delta between levels)
+          incomeEntries.culture = (incomeEntries.culture || 0) + cultureIncome;
+        }
+
+        // Form-Partnerschaft: get back 1 per 3 spent
+        if (laws.form_partnerschaft) {
+          for (const res in cost) {
+            cost[res] = Math.max(0, cost[res] - Math.floor(cost[res] / 3));
+          }
         }
       }
 
@@ -1073,6 +1182,19 @@ function initTradeRatios() {
           maintenanceEntries[res] = val;
         }
       }
+      // Mobilitätsreform: trade routes -2 AWE, no capacity
+      if (laws.mobilitaetsreform && (specialType === "handelsroute" || specialType === "handelsroute_gefaehrlich")) {
+        if (cost.money) cost.money = Math.max(0, cost.money - 2);
+        capacityCost = {};
+      }
+
+      // Form-Partnerschaft: get back 1 per 3 spent
+      if (laws.form_partnerschaft) {
+        for (const res in cost) {
+          cost[res] = Math.max(0, cost[res] - Math.floor(cost[res] / 3));
+        }
+      }
+
       label = translations[currentLang][specialType] || specialType;
       return { cost, capacityCost, maintenanceEntries, incomeEntries: {}, label, category, data, mode: "build" };
 
@@ -1088,6 +1210,17 @@ function initTradeRatios() {
           maintenanceEntries[res] = val;
         }
       }
+      // Abrüstung erzwingen: +N AWE maintenance per application
+      if (laws.abruestung_erzwingen > 0) {
+        maintenanceEntries.money = (maintenanceEntries.money || 0) + laws.abruestung_erzwingen;
+      }
+
+      // Gerechter Krieg: spend culture instead of AWE
+      if (laws.gerechter_krieg && cost.money) {
+        cost.culture = (cost.culture || 0) + cost.money;
+        cost.money = 0;
+      }
+
       label = translations[currentLang][unitType] || unitType;
       return { cost, capacityCost, maintenanceEntries, incomeEntries: {}, label, category, data, mode: "build" };
 
@@ -1103,9 +1236,27 @@ function initTradeRatios() {
           maintenanceEntries[res] = val;
         }
       }
-      // Apply law: Vorrang für Reinmetall — all ships cost -1 AWE (min 1)
+      // Sklavenarbeit: sternenbasis AWE cost halved, no maintenance
+      if (laws.sklavenarbeit && (unitType === "sternenbasis" || unitType === "fort_sternenbasis")) {
+        if (cost.money) cost.money = Math.ceil(cost.money / 2);
+        maintenanceEntries = {};
+      }
+
+      // Vorrang für Reinmetall: -1 AWE (or -2 with Druckmittel), min 1
       if (laws.vorrang_reinmetall && cost.money) {
-        cost.money = Math.max(1, cost.money - 1);
+        const discount = laws.druckmittel_reinmetall ? 2 : 1;
+        cost.money = Math.max(1, cost.money - discount);
+      }
+
+      // Abrüstung erzwingen: +N AWE maintenance per application
+      if (laws.abruestung_erzwingen > 0) {
+        maintenanceEntries.money = (maintenanceEntries.money || 0) + laws.abruestung_erzwingen;
+      }
+
+      // Gerechter Krieg: spend culture instead of AWE
+      if (laws.gerechter_krieg && cost.money) {
+        cost.culture = (cost.culture || 0) + cost.money;
+        cost.money = 0;
       }
 
       label = translations[currentLang][unitType] || unitType;
@@ -1315,6 +1466,16 @@ function initTradeRatios() {
       fort_korvette_note: "Note: 1 AWE maintenance per 2 ships",
       forschungsschiff_note: "Note: 1 food maintenance per 3 ships",
       law_vorrang_reinmetall: "Priority for Pure Metal (ship AWE cost -1)",
+      law_druckmittel_reinmetall: "Black Market: Leverage against Pure Metal (doubles Vorrang effect)",
+      law_abruestung_erzwingen: "Force Disarmament (military maintenance +N AWE)",
+      law_gerechter_krieg: "Just War [Autokratie] (military units: spend Culture instead of AWE)",
+      law_kriegskodex: "War Codex [Autokratie] (capacity buildings: -1 AWE cost, +2/4/6 culture income)",
+      law_sklavenarbeit: "Slave Labor [Imperium] (starbases: AWE cost ÷2, no maintenance)",
+      law_oekonomische_fusion: "Economic Fusion [Förderation] (resource buildings: +N income, members",
+      law_form_partnerschaft: "Form Partnership [Soziokratie] (building cost: -1 per 3 spent)",
+      law_mobilitaetsreform: "Mobility Reform [Soziokratie] (trade routes: -2 AWE, no capacity)",
+      law_freie_forschung: "Free Research [Technokratie] (research buildings: -1 maintenance, +2 research)",
+      law_transmutation: "Transmutation [Logokratie] (food/AWE resource buildings: +2 income)",
       not_enough_resources: "Not enough resources",
       not_enough_capacity: "Not enough capacity",
     },
@@ -1424,6 +1585,16 @@ function initTradeRatios() {
       fort_korvette_note: "Hinweis: 1 AWE Unterhalt pro 2 Schiffe",
       forschungsschiff_note: "Hinweis: 1 Nahrung Unterhalt pro 3 Schiffe",
       law_vorrang_reinmetall: "Vorrang für Reinmetall (Schiff AWE-Kosten -1)",
+      law_druckmittel_reinmetall: "Schwarzmarktkarte: Druckmittel gegen Reinmetall (Vorrang-Effekt ×2)",
+      law_abruestung_erzwingen: "Abrüstung erzwingen (Militär-Unterhalt +N AWE)",
+      law_gerechter_krieg: "Gerechter Krieg [Autokratie] (Militäreinheiten: Kultur statt AWE ausgeben)",
+      law_kriegskodex: "Kriegskodex [Autokratie] (Kapazitätsgebäude: -1 AWE Kosten, +2/4/6 Kultur)",
+      law_sklavenarbeit: "Sklavenarbeit [Imperium] (Sternbasen: AWE-Kosten ÷2, kein Unterhalt)",
+      law_oekonomische_fusion: "Ökonomische Fusion [Förderation] (Rohstoffgebäude: +N Einkommen, Mitglieder",
+      law_form_partnerschaft: "Form-Partnerschaft [Soziokratie] (Baukosten: -1 pro 3 ausgegeben)",
+      law_mobilitaetsreform: "Mobilitätsreform [Soziokratie] (Handelsrouten: -2 AWE, keine Kapazität)",
+      law_freie_forschung: "Freie Forschung [Technokratie] (Forschungsgebäude: -1 Unterhalt, +2 Forschung)",
+      law_transmutation: "Transmutation [Logokratie] (Nahrung/AWE Rohstoffgebäude: +2 Einkommen)",
       not_enough_resources: "Nicht genug Ressourcen",
       not_enough_capacity: "Nicht genug Kapazität",
     },
