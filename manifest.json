@@ -1,0 +1,27 @@
+{
+  "name": "Sternenkinder Ressourcen-Tracker",
+  "short_name": "Ressourcen",
+  "description": "Ressourcen-Tracker für Sternenkinder",
+  "start_url": "./ressourcen-skript.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "lang": "de",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "sk_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "sk_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

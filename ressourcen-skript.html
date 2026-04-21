@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ressourcen-Tracker mit Quellen</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="favicon.ico">
   <style>
     body {
       background-color: white !important;
@@ -764,6 +767,12 @@ function initTradeRatios() {
       updateOtherResourceDisplay(type);
     });
 
+  }
+</script>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js");
   }
 </script>
 
