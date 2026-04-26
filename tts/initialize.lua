@@ -26,7 +26,9 @@ local SCENARIOS = {
     { label = "2 vs. 2",              scenario = "full",     players = 4, team = "2v2" },
     { label = "3 vs. 3",              scenario = "full",     players = 6, team = "3v3" },
 }
-local setupMap  -- Forward-Declaration
+local setupMap        -- Forward-Declaration
+local shuffleDecks    -- Forward-Declaration
+local setupFernerKrieg -- Forward-Declaration
 
 
 local function buildUI()
@@ -77,6 +79,8 @@ function onScenarioChosen(player, value, id)
     TEAM_MODE    = s.team
     UI.hide("setupPanel")
     print("[MapSetup] Starte: " .. s.label)
+    shuffleDecks()
+    setupFernerKrieg()
     setupMap()
 end
 
@@ -501,7 +505,7 @@ local DECK_GUIDS = {
     "0785fb", "5e39f1", "acb627", "5a5092", "6b01d1",
 }
 
-local function shuffleDecks()
+shuffleDecks = function()
     for _, guid in ipairs(DECK_GUIDS) do
         local deck = getObjectFromGUID(guid)
         if deck then
@@ -513,7 +517,120 @@ local function shuffleDecks()
     print("[MapSetup] Alle Kartenstapel gemischt.")
 end
 
+-- Position wo abgeworfene Karten landen
+local DISCARD_POS = {x = -45.64, y = 0.76, z = 3.80}
+
+-- Ferner Krieg Stapel: Karten pro Stufe, in der Reihenfolge wie sie im Stapel liegen
+-- Stufe I liegt oben, Stufe III unten
+local FERNER_KRIEG = {
+    {
+        guid  = "15822c",  -- Boden
+        name  = "Ferner Krieg Boden",
+        tiers = {
+            { "3aa43d", "175218", "7f3a77", "ef71a3" },  -- Stufe I
+            { "337429", "2829c1", "bf0dee" },              -- Stufe II
+            { "860268", "25bd44" },                        -- Stufe III
+        },
+    },
+    {
+        guid  = "7feb0b",  -- Weltraum
+        name  = "Ferner Krieg Weltraum",
+        tiers = {
+            { "af364d", "e5a973", "8b16e1", "1cd6e4" },  -- Stufe I
+            { "3f7c02", "296815", "c287a4" },              -- Stufe II
+            { "52c248", "f7ba87" },                        -- Stufe III
+        },
+    },
+}
+
+-- Verarbeitet eine einzelne Stufe eines Stapels:
+-- Karten raus, mischen, eine abwerfen, Rest zuruecklegen, dann callback()
+local function processTier(stapelGuid, stapelName, tierGuids, callback)
+    local takenCards = {}
+    local STEP = 0.4
+
+    for i, cardGuid in ipairs(tierGuids) do
+        Wait.time(function()
+            local deck = getObjectFromGUID(stapelGuid)
+            if not deck then
+                print("[MapSetup] " .. stapelName .. " nicht gefunden!")
+                return
+            end
+            local found = false
+            for _, entry in ipairs(deck.getObjects()) do
+                if entry.guid == cardGuid then found = true; break end
+            end
+            if not found then
+                print("[MapSetup] Karte nicht im Stapel: " .. cardGuid)
+                return
+            end
+            local card = deck.takeObject({
+                guid     = cardGuid,
+                position = PARK_POS,
+                smooth   = false,
+            })
+            if card then table.insert(takenCards, card) end
+        end, (i - 1) * STEP)
+    end
+
+    Wait.time(function()
+        if #takenCards == 0 then
+            if callback then callback() end
+            return
+        end
+        math.randomseed(os.time())
+        for i = #takenCards, 2, -1 do
+            local j = math.random(i)
+            takenCards[i], takenCards[j] = takenCards[j], takenCards[i]
+        end
+        local discardCard = table.remove(takenCards, 1)
+        discardCard.setPosition(DISCARD_POS)
+        discardCard.setRotation({0, 0, 180})
+        local deck = getObjectFromGUID(stapelGuid)
+        for _, card in ipairs(takenCards) do
+            if deck then
+                deck.putObject(card)
+                deck = getObjectFromGUID(stapelGuid)
+            else
+                card.setPosition(PARK_POS)
+                deck = card
+            end
+        end
+        print("[MapSetup] " .. stapelName .. " Stufe gemischt, 1 Karte abgeworfen.")
+        if callback then callback() end
+    end, #tierGuids * STEP)
+end
+
+local function processStapel(stapel, tierIdx, callback)
+    if tierIdx < 1 then
+        print("[MapSetup] " .. stapel.name .. " vollstaendig vorbereitet.")
+        if callback then callback() end
+        return
+    end
+    processTier(stapel.guid, stapel.name, stapel.tiers[tierIdx], function()
+        processStapel(stapel, tierIdx - 1, callback)
+    end)
+end
+
+setupFernerKrieg = function()
+    -- Stufen 1->2->3 verarbeiten: putObject legt unter den Stapel,
+    -- also wird Stufe III zuerst gelegt (unten) und Stufe I zuletzt (oben)
+    local function processStapelVorwaerts(stapel, tierIdx, callback)
+        if tierIdx > #stapel.tiers then
+            print("[MapSetup] " .. stapel.name .. " vollstaendig vorbereitet.")
+            if callback then callback() end
+            return
+        end
+        processTier(stapel.guid, stapel.name, stapel.tiers[tierIdx], function()
+            processStapelVorwaerts(stapel, tierIdx + 1, callback)
+        end)
+    end
+    processStapelVorwaerts(FERNER_KRIEG[1], 1, function()
+        processStapelVorwaerts(FERNER_KRIEG[2], 1, nil)
+    end)
+end
+
+
 function onLoad()
-    shuffleDecks()
     Wait.time(showSetupUI, 1.0)
 end
