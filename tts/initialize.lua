@@ -10,22 +10,45 @@
 local PLAYER_COUNT = 2
 local SCENARIO     = "full"
 local TEAM_MODE    = nil
+local LANGUAGE     = "de"  -- "de" oder "en"
+
+local LABELS = {
+    de = {
+        title    = "Szenario waehlen",
+        cancel   = "Abbrechen",
+        tutorial = "Tutorial",
+        players  = "Spieler",
+        versus   = "vs.",
+    },
+    en = {
+        title    = "Choose Scenario",
+        cancel   = "Cancel",
+        tutorial = "Tutorial",
+        players  = "Players",
+        versus   = "vs.",
+    },
+}
+
 
 -- ============================================================
 --  HUD-UI  (erscheint beim Host im Sichtfeld)
 -- ============================================================
 
-local SCENARIOS = {
-    { label = "Tutorial – 2 Spieler", scenario = "tutorial", players = 2, team = nil },
-    { label = "Tutorial – 3 Spieler", scenario = "tutorial", players = 3, team = nil },
-    { label = "2 Spieler",            scenario = "full",     players = 2, team = nil },
-    { label = "3 Spieler",            scenario = "full",     players = 3, team = nil },
-    { label = "4 Spieler",            scenario = "full",     players = 4, team = nil },
-    { label = "5 Spieler",            scenario = "full",     players = 5, team = nil },
-    { label = "6 Spieler",            scenario = "full",     players = 6, team = nil },
-    { label = "2 vs. 2",              scenario = "full",     players = 4, team = "2v2" },
-    { label = "3 vs. 3",              scenario = "full",     players = 6, team = "3v3" },
-}
+local function makeScenarios()
+    local L = LABELS[LANGUAGE] or LABELS["de"]
+    return {
+        { label = L.tutorial .. " - 2 " .. L.players, scenario = "tutorial", players = 2, team = nil },
+        { label = L.tutorial .. " - 3 " .. L.players, scenario = "tutorial", players = 3, team = nil },
+        { label = "2 " .. L.players,                  scenario = "full",     players = 2, team = nil },
+        { label = "3 " .. L.players,                  scenario = "full",     players = 3, team = nil },
+        { label = "4 " .. L.players,                  scenario = "full",     players = 4, team = nil },
+        { label = "5 " .. L.players,                  scenario = "full",     players = 5, team = nil },
+        { label = "6 " .. L.players,                  scenario = "full",     players = 6, team = nil },
+        { label = "2 " .. L.versus .. " 2",           scenario = "full",     players = 4, team = "2v2" },
+        { label = "3 " .. L.versus .. " 3",           scenario = "full",     players = 6, team = "3v3" },
+    }
+end
+local SCENARIOS = makeScenarios()
 local setupMap        -- Forward-Declaration
 local shuffleDecks    -- Forward-Declaration
 local setupFernerKrieg -- Forward-Declaration
@@ -38,7 +61,7 @@ local function buildUI()
     parts[#parts+1] = ' childAlignment="UpperCenter"'
     parts[#parts+1] = ' childForceExpandWidth="true">'
     parts[#parts+1] = '<Text fontSize="20" fontStyle="Bold" color="#c8c640"'
-    parts[#parts+1] = ' preferredHeight="36" alignment="MiddleCenter">Szenario waehlen</Text>'
+    parts[#parts+1] = ' preferredHeight="36" alignment="MiddleCenter">' .. (LABELS[LANGUAGE] or LABELS["de"]).title .. '</Text>'
     for i, s in ipairs(SCENARIOS) do
         -- onClick uebergibt (player, value) an den Handler
         -- Wir kodieren den Index als id und lesen ihn per UI.getAttribute
@@ -52,7 +75,7 @@ local function buildUI()
                    .. ' onClick="onScenarioChosen"'
                    .. ' fontSize="16" preferredHeight="38"'
                    .. ' color="#4a1a1a" textColor="#e8e6de"'
-                   .. ' highlightColor="#6a2a2a">Abbrechen</Button>'
+                   .. ' highlightColor="#6a2a2a">' .. (LABELS[LANGUAGE] or LABELS["de"]).cancel .. '</Button>'
     parts[#parts+1] = '</VerticalLayout>'
     return table.concat(parts, "\n")
 end
