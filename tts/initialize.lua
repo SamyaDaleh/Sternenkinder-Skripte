@@ -518,7 +518,8 @@ shuffleDecks = function()
 end
 
 -- Position wo abgeworfene Karten landen
-local DISCARD_POS = {x = -45.64, y = 0.76, z = 3.80}
+local DISCARD_POS = {x = 9.90, y = 0.80, z = -32.63}
+local DISCARD_PILE_GUID = nil  -- GUID des Ablagestapels
 
 -- Ferner Krieg Stapel: Karten pro Stufe, in der Reihenfolge wie sie im Stapel liegen
 -- Stufe I liegt oben, Stufe III unten
@@ -547,8 +548,9 @@ local FERNER_KRIEG = {
 -- Karten raus, mischen, eine abwerfen, Rest zuruecklegen, dann callback()
 local function processTier(stapelGuid, stapelName, tierGuids, callback)
     local takenCards = {}
-    local STEP = 0.4
+    local STEP = 0.6  -- grosszuegiger Delay gegen Lag
 
+    -- Karten einzeln herausnehmen
     for i, cardGuid in ipairs(tierGuids) do
         Wait.time(function()
             local deck = getObjectFromGUID(stapelGuid)
@@ -565,41 +567,66 @@ local function processTier(stapelGuid, stapelName, tierGuids, callback)
                 return
             end
             local card = deck.takeObject({
-                guid     = cardGuid,
-                position = PARK_POS,
-                smooth   = false,
+                guid        = cardGuid,
+                position    = PARK_POS,
+                rotation    = {x=0, y=0, z=180},
+                smooth      = false,
+                flip        = true,
             })
             if card then table.insert(takenCards, card) end
         end, (i - 1) * STEP)
     end
 
+    -- Nach allen takeObject: mischen, abwerfen, zuruecklegen
+    local totalDelay = #tierGuids * STEP + 0.5
     Wait.time(function()
         if #takenCards == 0 then
             if callback then callback() end
             return
         end
+        -- Mischen
         math.randomseed(os.time())
         for i = #takenCards, 2, -1 do
             local j = math.random(i)
             takenCards[i], takenCards[j] = takenCards[j], takenCards[i]
         end
+        -- Abwerfen
         local discardCard = table.remove(takenCards, 1)
-        discardCard.setPosition(DISCARD_POS)
-        discardCard.setRotation({0, 0, 180})
-        local deck = getObjectFromGUID(stapelGuid)
-        for _, card in ipairs(takenCards) do
-            if deck then
-                deck.putObject(card)
-                deck = getObjectFromGUID(stapelGuid)
-            else
-                card.setPosition(PARK_POS)
-                deck = card
-            end
+        local pile = DISCARD_PILE_GUID and getObjectFromGUID(DISCARD_PILE_GUID)
+        if pile then
+            pile.putObject(discardCard)
+            -- GUID neu holen da Deck-Objekt sich aendern kann
+            Wait.time(function()
+                local newPile = getObjectFromGUID(DISCARD_PILE_GUID)
+                if not newPile then
+                    DISCARD_PILE_GUID = discardCard.getGUID()
+                end
+            end, 0.3)
+        else
+            discardCard.setPosition(DISCARD_POS)
+            discardCard.setRotation({x=0, y=0, z=180})
+            discardCard.setName("Ablagestapel")
+            DISCARD_PILE_GUID = discardCard.getGUID()
         end
-        print("[MapSetup] " .. stapelName .. " Stufe gemischt, 1 Karte abgeworfen.")
-        if callback then callback() end
-    end, #tierGuids * STEP)
+        -- Rest zuruecklegen mit Delay zwischen den Karten
+        for i, card in ipairs(takenCards) do
+            Wait.time(function()
+                local deck = getObjectFromGUID(stapelGuid)
+                if deck then
+                    deck.putObject(card)
+                else
+                    card.setPosition(PARK_POS)
+                end
+            end, (i - 1) * 0.4)
+        end
+        local doneDelay = #takenCards * 0.4 + 0.3
+        Wait.time(function()
+            print("[MapSetup] " .. stapelName .. " Stufe gemischt, 1 Karte abgeworfen.")
+            if callback then callback() end
+        end, doneDelay)
+    end, totalDelay)
 end
+
 
 local function processStapel(stapel, tierIdx, callback)
     if tierIdx < 1 then
