@@ -263,6 +263,29 @@
 <h3>Action Log</h3>
 <textarea id="action-log" rows="10" cols="100" readonly></textarea>
 
+<br>
+<br>
+
+<button onclick="toggleExport()" data-i18n="export"></button>
+<button onclick="toggleImport()" data-i18n="import"></button>
+
+<div id="export-area" style="display:none">
+  <br>
+  <label data-i18n="export_hint"></label><br>
+  <textarea id="export-text" rows="6" cols="100" readonly onclick="this.select()"></textarea>
+</div>
+
+<div id="import-area" style="display:none">
+  <br>
+  <label data-i18n="import_hint"></label><br>
+  <textarea id="import-text" rows="6" cols="100"></textarea>
+  <br>
+  <button onclick="doImportState()" data-i18n="import_load"></button>
+</div>
+
+<br>
+<br>
+
 <script>
   let currentLang = localStorage.getItem("lang") || "de";
 
@@ -657,6 +680,65 @@ function initTradeRatios() {
     input.value = value;
   }
 
+  function computeChecksum(str) {
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      hash ^= str.charCodeAt(i);
+      hash = Math.imul(hash, 0x01000193);
+    }
+    return (hash >>> 0).toString(16).padStart(8, '0');
+  }
+
+  function toggleExport() {
+    const area = document.getElementById("export-area");
+    if (area.style.display === "none") {
+      saveState();
+      const stateJson = localStorage.getItem("gameState");
+      const checksum = computeChecksum(stateJson);
+      document.getElementById("export-text").value = JSON.stringify({ checksum, state: stateJson });
+      area.style.display = "block";
+    } else {
+      area.style.display = "none";
+    }
+  }
+
+  function toggleImport() {
+    const area = document.getElementById("import-area");
+    area.style.display = area.style.display === "none" ? "block" : "none";
+  }
+
+  function doImportState() {
+    const text = document.getElementById("import-text").value.trim();
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      alert(translations[currentLang].import_invalid);
+      return;
+    }
+    const { checksum, state: stateJson } = parsed;
+    if (!stateJson || !checksum) {
+      alert(translations[currentLang].import_invalid);
+      return;
+    }
+    const checksumOk = computeChecksum(stateJson) === checksum;
+    if (!checksumOk) {
+      if (!confirm(translations[currentLang].import_checksum_error)) return;
+    }
+    let state;
+    try {
+      state = JSON.parse(stateJson);
+    } catch (e) {
+      alert(translations[currentLang].import_invalid);
+      return;
+    }
+    localStorage.setItem("lang", state.lang || currentLang);
+    localStorage.setItem("gameState", stateJson);
+    loadState();
+    if (!checksumOk) logAction(translations[currentLang].import_checksum_log);
+    alert(translations[currentLang].import_success);
+  }
+
   const translations = {
     en: {
       account: "Account",
@@ -700,6 +782,15 @@ function initTradeRatios() {
       units: "Units",
       victory_points: "Victory Points",
       votes: "Votes",
+      export: "Export",
+      import: "Import",
+      export_hint: "Copy this text to save your game state:",
+      import_hint: "Paste your saved game state and click Load:",
+      import_load: "Load",
+      import_checksum_error: "Checksum mismatch — the data may have been altered. Load anyway?",
+      import_invalid: "Invalid import data.",
+      import_success: "Game state loaded successfully.",
+      import_checksum_log: "WARNING: Imported state had an invalid checksum — data may have been edited.",
     },
     de: {
       account: "Konto",
@@ -743,6 +834,15 @@ function initTradeRatios() {
       units: "Einheiten",
       victory_points: "Siegpunkte",
       votes: "Stimmen",
+      export: "Exportieren",
+      import: "Importieren",
+      export_hint: "Kopiere diesen Text, um deinen Spielstand zu sichern:",
+      import_hint: "Füge deinen Spielstand ein und klicke Laden:",
+      import_load: "Laden",
+      import_checksum_error: "Prüfsumme stimmt nicht überein – die Daten wurden möglicherweise verändert. Trotzdem laden?",
+      import_invalid: "Ungültige Importdaten.",
+      import_success: "Spielstand erfolgreich geladen.",
+      import_checksum_log: "WARNUNG: Der importierte Spielstand hatte eine ungültige Prüfsumme – die Daten wurden möglicherweise bearbeitet.",
     },
   };
 
